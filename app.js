@@ -10,7 +10,8 @@ const mongoose = require('mongoose');
 const methodOverride = require('method-override');
 const engine = require('ejs-mate');
 const Park = require("./models/park");
-const catchAsync = require("./util/catchAsync");
+const catchAsync = require("./utils/catchAsync");
+const ExpressError = require("./utils/ExpressError");
 
 mongoose.connect('mongodb://localhost:27017/calparks3', {
     useNewUrlParser: true,
@@ -60,6 +61,8 @@ app.get('/parks/new', (req, res) => {
 
 // POST route to create a NEW park
 app.post('/parks', catchAsync(async(req, res) => {
+    // server side error handling for invalid parks
+    if(!req.body.park) throw new ExpressError('Invalid Park Data', 400);
     const park = new Park(req.body.park);
     await park.save();
     res.redirect(`/parks/${park._id}`);
@@ -92,9 +95,16 @@ app.delete('/parks/:id', catchAsync(async(req, res) => {
     res.redirect('/parks');
 }));
 
+// 
+app.all('*', (req, res, next) => {
+    next(new ExpressError('Page Not Found', 404))
+});
+
 // error handling
 app.use((err, req, res, next) => {
-    res.send("Uh-oh, something went wrong!")
+    const { statusCode = 500} = err;
+    if(!err.message) err.message = "Oh no. Something went wrong!"
+    res.status(statusCode).render('error', { err });
 })
 
 // to start server at command prompt type: node app.js or nodemon app.js
