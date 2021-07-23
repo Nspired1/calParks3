@@ -12,6 +12,7 @@ const engine = require('ejs-mate');
 const Park = require("./models/park");
 const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError");
+const Joi = require('joi');
 
 mongoose.connect('mongodb://localhost:27017/calparks3', {
     useNewUrlParser: true,
@@ -33,14 +34,34 @@ app.set('views', path.join(__dirname, 'views'))
 app.use(methodOverride('_method'));
 app.use(express.urlencoded({ extended: true }));
 
-
-
 // use morgan logging library for development
 app.use(morgan("dev"));
 
 // env variables
 const PORT = process.env.PORT || 3001;
 const IP = process.env.IP;
+
+// Joi validation
+const validatePark = (req, res, next) => {
+    const parkSchema = Joi.object({
+        park: Joi.object({
+            title: Joi.string().required(),
+            description: Joi.string().required(),
+            location: Joi.string().required(),
+            price: Joi.number().min(0).allow(null, ''),
+            image: Joi.string().allow(null, '')
+        }).required()
+    })
+    const { error } = parkSchema.validate(req.body);
+    if (error){
+        const msg = error.details.map(element => element.message).join(',')
+        throw new ExpressError(msg, 400)
+    } else {
+        next();
+    }
+    
+}
+
 
 // ROUTES
 
@@ -60,7 +81,7 @@ app.get('/parks/new', (req, res) => {
 });
 
 // POST route to create a NEW park
-app.post('/parks', catchAsync(async(req, res) => {
+app.post('/parks', validatePark, catchAsync(async(req, res) => {
     // server side error handling for invalid parks
     if(!req.body.park) throw new ExpressError('Invalid Park Data', 400);
     const park = new Park(req.body.park);
@@ -68,7 +89,7 @@ app.post('/parks', catchAsync(async(req, res) => {
     res.redirect(`/parks/${park._id}`);
 }));
 
-//GET single park
+// GET single park
 app.get('/parks/:id', catchAsync(async(req, res) => {
     const park = await Park.findById(req.params.id)
     res.render('parks/show', { park });
