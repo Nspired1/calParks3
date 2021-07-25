@@ -16,6 +16,32 @@
                 <form class="d-inline" action="/parks/<%= park._id %>?_method=DELETE" method="POST">
                     <button class="btn btn-danger">DELETE</button>
                 </form>
+                <form action="/parks/<%= park._id %>/reviews" method="POST" class="mb-3 needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label class="form-label" for="rating">Rating</label>
+                        <input class="form-range" type="range" min="1" max="5" name="review[rating]" id="rating">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="body">Review</label>
+                        <textarea class="form-control" name="review[body]" id="body" cols="30" rows="3" required></textarea>
+                        <div class="valid-feedback">Looks good!</div>
+                    </div>
+                    <button class="btn btn-primary">Submit Review</button>
+                </form>
+                <div class="mb-3">
+                    <% for(let review of park.reviews){ %>
+                        <div class="card">
+                            <div class="mb-3 card-body">
+                                <p> Rating: <%= review.rating  %> </p>
+                                <p> Review: <%= review.body  %> </p>  
+                                <form action="/parks/<%= park._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST" >
+                                    <button class="btn btn-danger btn-sm">DELETE</button>
+                                </form>
+                            </div>
+                            
+                        </div>
+                    <% } %> 
+                </div>
                 <footer>
                     <a href="/parks">Back to ALL Parks</a>
                 </footer>
