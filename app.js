@@ -5,16 +5,19 @@ if (process.env.NODE_ENV !== "production") {
 const express = require('express');
 const app = express();
 const path = require('path');
-const morgan = require('morgan');
-const mongoose = require('mongoose');
+const session = require('express-session');
 const methodOverride = require('method-override');
 const engine = require('ejs-mate');
+const mongoose = require('mongoose');
 const Park = require("./models/park");
 const Review = require("./models/review");
 const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError");
 const Joi = require('joi');
 const { reviewSchema } = require('./joiSchemas.js');
+const morgan = require('morgan');
+const parkRoutes = require('./routes/parks');
+const reviewRoutes = require("./routes/reviews");
 
 mongoose.connect('mongodb://localhost:27017/calparks3', {
     useNewUrlParser: true,
@@ -33,6 +36,7 @@ app.engine('ejs', engine);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'))
 
+// use method override for put, patch, delete
 app.use(methodOverride('_method'));
 app.use(express.urlencoded({ extended: true }));
 
@@ -43,7 +47,7 @@ app.use(morgan("dev"));
 const PORT = process.env.PORT || 3001;
 const IP = process.env.IP;
 
-// Joi validation
+// Joi validation middleware
 const validatePark = (req, res, next) => {
     const parkSchema = Joi.object({
         park: Joi.object({
@@ -76,82 +80,13 @@ const validateReview = (req, res, next) => {
 
 // ROUTES
 
+app.use("/parks", parkRoutes);
+app.use("/parks/:id/reviews", reviewRoutes);
+
 // GET home page
 app.get('/', (req, res) => {
     res.render('home');
 });
-
-// GET all parks
-app.get('/parks', catchAsync(async (req, res)=>{
-    const parks = await Park.find({});
-    res.render('parks/index', {parks});
-}));
-
-// GET the NEW form
-app.get('/parks/new', (req, res) => {
-    res.render('parks/new');
-});
-
-// POST route to create a NEW park
-app.post('/parks', validatePark, catchAsync(async(req, res) => {
-    // server side error handling for invalid parks
-    if(!req.body.park) throw new ExpressError('Invalid Park Data', 400);
-    const park = new Park(req.body.park);
-    await park.save();
-    res.redirect(`/parks/${park._id}`);
-}));
-
-// GET single park SHOW
-app.get('/parks/:id', catchAsync(async(req, res) => {
-    const park = await Park.findById(req.params.id).populate('reviews');
-    console.log(park)
-    res.render('parks/show', { park });
-}));
-
-// EDIT form
-app.get('/parks/:id/edit', catchAsync(async(req, res) => {
-    const park = await Park.findById(req.params.id);
-    res.render('parks/edit', { park } );
-}));
-
-// EDIT route
-app.put('/parks/:id', catchAsync(async(req, res) => {
-    const { id } = req.params;
-    const park = await Park.findByIdAndUpdate(id, {...req.body.park});
-    console.log(park);
-    res.redirect(`/parks/${park._id}`);
-}));
-
-// DELETE
-app.delete('/parks/:id', catchAsync(async(req, res) => {
-    const { id } = req.params;
-    await Park.findByIdAndDelete(id);
-    res.redirect('/parks');
-}));
-
-// reviews routes
-
-// POST a review
-app.post('/parks/:id/reviews', validateReview, catchAsync(async(req, res) =>{
-    const park = await Park.findById(req.params.id);
-    const review = new Review(req.body.review);
-    park.reviews.push(review);
-    await review.save();
-    await park.save();
-    console.log(review);
-    res.redirect(`/parks/${park._id}`)
-}));
-
-// DELETE a review
-app.delete('/parks/:id/reviews/:reviewId', catchAsync(async (req, res) => {
-    const { id, reviewId } = req.params;
-    // delete the reference in Park from array of references
-    await Park.findByIdAndUpdate(id, {$pull: {reviews: reviewId }})
-    // delete the review itself
-    await Review.findByIdAndDelete(req.params.reviewId);
-    res.redirect(`/parks/${id}`);
-
-}))
 
 // 
 app.all('*', (req, res, next) => {
