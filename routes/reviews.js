@@ -1,5 +1,5 @@
 const express = require("express")
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 const Park = require("../models/park");
 const Review = require("../models/review");
 const catchAsync = require("../utils/catchAsync");
