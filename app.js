@@ -40,6 +40,9 @@ app.set('views', path.join(__dirname, 'views'))
 app.use(methodOverride('_method'));
 app.use(express.urlencoded({ extended: true }));
 
+// use static assets
+app.use(express.static(path.join(__dirname, 'public')));
+
 // use morgan logging library for development
 app.use(morgan("dev"));
 
@@ -67,15 +70,15 @@ const validatePark = (req, res, next) => {
     }
 }
 
-const validateReview = (req, res, next) => {
-    const { error } = reviewSchema.validate(req.body);
-    if (error){
-        const msg = error.details.map(element => element.message).join(',')
-        throw new ExpressError(msg, 400)
-    } else {
-        next();
-    }
-}
+// const validateReview = (req, res, next) => {
+//     const { error } = reviewSchema.validate(req.body);
+//     if (error){
+//         const msg = error.details.map(element => element.message).join(',')
+//         throw new ExpressError(msg, 400)
+//     } else {
+//         next();
+//     }
+// }
 
 
 // ROUTES
@@ -88,7 +91,7 @@ app.get('/', (req, res) => {
     res.render('home');
 });
 
-// 
+// handle non-existent pages
 app.all('*', (req, res, next) => {
     next(new ExpressError('Page Not Found', 404))
 });
