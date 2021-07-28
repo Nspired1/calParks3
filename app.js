@@ -7,6 +7,9 @@ const app = express();
 const path = require('path');
 const session = require('express-session');
 const flash = require("connect-flash");
+const passport = require('passport');
+const LocalStrategy = require("passport-local");
+const User = require('./models/user');
 const methodOverride = require('method-override');
 const engine = require('ejs-mate');
 const mongoose = require('mongoose');
@@ -19,6 +22,8 @@ const { reviewSchema } = require('./joiSchemas.js');
 const morgan = require('morgan');
 const parkRoutes = require('./routes/parks');
 const reviewRoutes = require("./routes/reviews");
+const userRoutes = require('./routes/users');
+
 
 mongoose.connect('mongodb://localhost:27017/calparks3', {
     useNewUrlParser: true,
@@ -57,8 +62,16 @@ const sessionConfig = {
     }
 }
 app.use(session(sessionConfig));
-app.use(flash());
 
+// user authorization and authentication with passport
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+// use flash
+app.use(flash());
 app.use((req, res, next ) => {
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
@@ -97,6 +110,7 @@ const validatePark = (req, res, next) => {
 
 app.use("/parks", parkRoutes);
 app.use("/parks/:id/reviews", reviewRoutes);
+app.use("/", userRoutes);
 
 // GET home page
 app.get('/', (req, res) => {
