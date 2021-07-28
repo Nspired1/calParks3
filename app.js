@@ -6,6 +6,7 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const session = require('express-session');
+const flash = require("connect-flash");
 const methodOverride = require('method-override');
 const engine = require('ejs-mate');
 const mongoose = require('mongoose');
@@ -22,7 +23,8 @@ const reviewRoutes = require("./routes/reviews");
 mongoose.connect('mongodb://localhost:27017/calparks3', {
     useNewUrlParser: true,
     useCreateIndex: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useFindAndModify: false
 });
 
 const db = mongoose.connection;
@@ -42,6 +44,26 @@ app.use(express.urlencoded({ extended: true }));
 
 // use static assets
 app.use(express.static(path.join(__dirname, 'public')));
+
+// configure cookie session
+const sessionConfig = {
+    secret: 'onlyfordevelopment',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        httOnly: true,
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+        maxAge: 1000 * 60 * 60 * 24 * 7
+    }
+}
+app.use(session(sessionConfig));
+app.use(flash());
+
+app.use((req, res, next ) => {
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
+    next();
+})
 
 // use morgan logging library for development
 app.use(morgan("dev"));
@@ -69,16 +91,6 @@ const validatePark = (req, res, next) => {
         next();
     }
 }
-
-// const validateReview = (req, res, next) => {
-//     const { error } = reviewSchema.validate(req.body);
-//     if (error){
-//         const msg = error.details.map(element => element.message).join(',')
-//         throw new ExpressError(msg, 400)
-//     } else {
-//         next();
-//     }
-// }
 
 
 // ROUTES

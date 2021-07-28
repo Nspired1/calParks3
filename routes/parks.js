@@ -44,27 +44,35 @@ router.post('/', validatePark, catchAsync(async(req, res) => {
     if(!req.body.park) throw new ExpressError('Invalid Park Data', 400);
     const park = new Park(req.body.park);
     await park.save();
+    req.flash('success', 'Successfully made a new park!');
     res.redirect(`/parks/${park._id}`);
 }));
 
 // GET single park SHOW
 router.get('/:id', catchAsync(async(req, res) => {
     const park = await Park.findById(req.params.id).populate('reviews');
-    console.log(park)
+    if(!park){
+        req.flash('error', 'Park not found.');
+        res.redirect('/parks');
+    }
     res.render('parks/show', { park });
 }));
 
 // EDIT form
 router.get('/:id/edit', catchAsync(async(req, res) => {
     const park = await Park.findById(req.params.id);
+    if(!park){
+        req.flash('error', 'Park not found.');
+        res.redirect('/parks');
+    }
     res.render('parks/edit', { park } );
 }));
 
 // EDIT route
-router.put('/:id', catchAsync(async(req, res) => {
+router.put('/:id', validatePark, catchAsync(async(req, res) => {
     const { id } = req.params;
     const park = await Park.findByIdAndUpdate(id, {...req.body.park});
-    console.log(park);
+    req.flash('success', 'Successfully updated park!')
     res.redirect(`/parks/${park._id}`);
 }));
 
@@ -72,6 +80,7 @@ router.put('/:id', catchAsync(async(req, res) => {
 router.delete('/:id', catchAsync(async(req, res) => {
     const { id } = req.params;
     await Park.findByIdAndDelete(id);
+    req.flash('success', "Successfully deleted park!")
     res.redirect('/parks');
 }));
 
