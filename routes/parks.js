@@ -6,6 +6,7 @@ const catchAsync = require("../utils/catchAsync");
 const ExpressError = require("../utils/ExpressError");
 const Joi = require('joi');
 const { reviewSchema } = require('../joiSchemas.js');
+const { isLoggedIn } = require('../authMiddleware');
 
 // Joi validation middleware
 const validatePark = (req, res, next) => {
@@ -34,12 +35,12 @@ router.get('/', catchAsync(async (req, res)=>{
 }));
 
 // GET the NEW form
-router.get('/new', (req, res) => {
+router.get('/new', isLoggedIn, (req, res) => {
     res.render('parks/new');
 });
 
 // POST route to create a NEW park
-router.post('/', validatePark, catchAsync(async(req, res) => {
+router.post('/', isLoggedIn, validatePark, catchAsync(async(req, res) => {
     // server side error handling for invalid parks
     if(!req.body.park) throw new ExpressError('Invalid Park Data', 400);
     const park = new Park(req.body.park);
@@ -59,7 +60,7 @@ router.get('/:id', catchAsync(async(req, res) => {
 }));
 
 // EDIT form
-router.get('/:id/edit', catchAsync(async(req, res) => {
+router.get('/:id/edit', isLoggedIn, catchAsync(async(req, res) => {
     const park = await Park.findById(req.params.id);
     if(!park){
         req.flash('error', 'Park not found.');
@@ -69,7 +70,7 @@ router.get('/:id/edit', catchAsync(async(req, res) => {
 }));
 
 // EDIT route
-router.put('/:id', validatePark, catchAsync(async(req, res) => {
+router.put('/:id', isLoggedIn, validatePark, catchAsync(async(req, res) => {
     const { id } = req.params;
     const park = await Park.findByIdAndUpdate(id, {...req.body.park});
     req.flash('success', 'Successfully updated park!')
@@ -77,11 +78,13 @@ router.put('/:id', validatePark, catchAsync(async(req, res) => {
 }));
 
 // DELETE
-router.delete('/:id', catchAsync(async(req, res) => {
+router.delete('/:id', isLoggedIn, catchAsync(async(req, res) => {
     const { id } = req.params;
     await Park.findByIdAndDelete(id);
     req.flash('success', "Successfully deleted park!")
     res.redirect('/parks');
 }));
+
+
 
 module.exports = router;
