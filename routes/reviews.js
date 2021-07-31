@@ -6,24 +6,16 @@ const catchAsync = require("../utils/catchAsync");
 const ExpressError = require("../utils/ExpressError");
 const Joi = require('joi');
 const { reviewSchema } = require('../joiSchemas.js');
+const { validateReview, isLoggedIn, isReviewAuthor } = require('../authMiddleware');
 
-//  joi validation middleware
-const validateReview = (req, res, next) => {
-    const { error } = reviewSchema.validate(req.body);
-    if (error){
-        const msg = error.details.map(element => element.message).join(',')
-        throw new ExpressError(msg, 400)
-    } else {
-        next();
-    }
-}
 
 // reviews routes
 
 // POST a review
-router.post('/', validateReview, catchAsync(async(req, res) =>{
+router.post('/', isLoggedIn, validateReview, catchAsync(async(req, res) =>{
     const park = await Park.findById(req.params.id);
     const review = new Review(req.body.review);
+    review.author = req.user._id;
     park.reviews.push(review);
     await review.save();
     await park.save();
@@ -32,7 +24,7 @@ router.post('/', validateReview, catchAsync(async(req, res) =>{
 }));
 
 // DELETE a review
-router.delete('/:reviewId', catchAsync(async (req, res) => {
+router.delete('/:reviewId', isLoggedIn, isReviewAuthor, catchAsync(async (req, res) => {
     const { id, reviewId } = req.params;
     // delete the reference in Park from array of references
     await Park.findByIdAndUpdate(id, {$pull: {reviews: reviewId }})
