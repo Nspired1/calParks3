@@ -30,6 +30,7 @@ const seedDB = async () => {
   for (let i = 0; i < 5; i++) {
     const random40 = Math.floor(Math.random() * 5);
     const park = new Park({
+      author:'6101aa949a4f165f51d7fd6e',
       location: `${cities[random40].city}, ${cities[random40].state}`,
       title: `${sample(descriptors)} ${sample(places)}`,
       description:
