@@ -5,31 +5,17 @@ const Review = require("../models/review");
 const catchAsync = require("../utils/catchAsync");
 const ExpressError = require("../utils/ExpressError");
 const Joi = require('joi');
-const { reviewSchema } = require('../joiSchemas.js');
-const { isLoggedIn } = require('../authMiddleware');
+//const { parkSchema } = require('../joiSchemas.js');
+const { isLoggedIn, isAuthor, validatePark } = require('../authMiddleware');
+//const { isLoggedIn, isAuthor } = require('../authMiddleware');
+const multer = require('multer');
+const { storage, cloudinary } = require('../cloudinary');
+const upload = multer({ storage });
 
-// Joi validation middleware
-const validatePark = (req, res, next) => {
-    const parkSchema = Joi.object({
-        park: Joi.object({
-            title: Joi.string().required(),
-            description: Joi.string().required(),
-            location: Joi.string().required(),
-            price: Joi.number().min(0).allow(null, ''),
-            image: Joi.string().allow(null, '')
-        }).required()
-    })
-    const { error } = parkSchema.validate(req.body);
-    if (error){
-        const msg = error.details.map(element => element.message).join(',')
-        throw new ExpressError(msg, 400)
-    } else {
-        next();
-    }
-}
+
 
 // GET all parks
-router.get('/', catchAsync(async (req, res)=>{
+router.get('/', catchAsync(async (req, res) => {
     const parks = await Park.find({});
     res.render('parks/index', {parks});
 }));
@@ -40,10 +26,11 @@ router.get('/new', isLoggedIn, (req, res) => {
 });
 
 // POST route to create a NEW park
-router.post('/', isLoggedIn, validatePark, catchAsync(async(req, res) => {
-    // server side error handling for invalid parks
-    if(!req.body.park) throw new ExpressError('Invalid Park Data', 400);
+router.post('/', isLoggedIn, upload.array('image'), validatePark, catchAsync(async(req, res, next) => {
     const park = new Park(req.body.park);
+    park.images = req.files.map( file => ({ url: file.path, filename: file.filename}))
+    park.author = req.user._id;
+    console.log(park);
     await park.save();
     req.flash('success', 'Successfully made a new park!');
     res.redirect(`/parks/${park._id}`);
@@ -51,16 +38,21 @@ router.post('/', isLoggedIn, validatePark, catchAsync(async(req, res) => {
 
 // GET single park SHOW
 router.get('/:id', catchAsync(async(req, res) => {
-    const park = await Park.findById(req.params.id).populate('reviews');
+    const park = await Park.findById(req.params.id).populate({
+        path: 'reviews', 
+        populate: {
+            path: 'author'
+        }}).populate('author');
     if(!park){
         req.flash('error', 'Park not found.');
         res.redirect('/parks');
     }
+    console.log(park);
     res.render('parks/show', { park });
 }));
 
 // EDIT form
-router.get('/:id/edit', isLoggedIn, catchAsync(async(req, res) => {
+router.get('/:id/edit', isLoggedIn, isAuthor, catchAsync(async(req, res) => {
     const park = await Park.findById(req.params.id);
     if(!park){
         req.flash('error', 'Park not found.');
@@ -70,17 +62,30 @@ router.get('/:id/edit', isLoggedIn, catchAsync(async(req, res) => {
 }));
 
 // EDIT route
-router.put('/:id', isLoggedIn, validatePark, catchAsync(async(req, res) => {
+router.put('/:id', isLoggedIn, isAuthor, upload.array('image'), validatePark, catchAsync(async(req, res) => {
     const { id } = req.params;
-    const park = await Park.findByIdAndUpdate(id, {...req.body.park});
+    const updatedPark = await Park.findByIdAndUpdate(id, {...req.body.park});
+    const images = req.files.map( file => ({ url: file.path, filename: file.filename}))
+    updatedPark.images.push(...images) 
+    await updatedPark.save();
+    if (req.body.deleteImages){
+        for(let filename of req.body.deleteImages){
+            await cloudinary.uploader.destroy(filename);
+        }
+        await updatedPark.updateOne({ $pull: {images: {filename: {$in: req.body.deleteImages }}}})
+    }
     req.flash('success', 'Successfully updated park!')
-    res.redirect(`/parks/${park._id}`);
+    res.redirect(`/parks/${updatedPark._id}`);
 }));
 
 // DELETE
-router.delete('/:id', isLoggedIn, catchAsync(async(req, res) => {
+router.delete('/:id', isLoggedIn, isAuthor, catchAsync(async(req, res) => {
     const { id } = req.params;
-    await Park.findByIdAndDelete(id);
+    const park = await Park.findById(id);
+    park.images.map((image) => {
+        cloudinary.uploader.destroy(image.filename);
+    });
+    await Park.findByIdAndDelete(id)
     req.flash('success', "Successfully deleted park!")
     res.redirect('/parks');
 }));

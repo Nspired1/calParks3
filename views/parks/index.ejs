@@ -8,7 +8,11 @@
         <div class="card" mb-3>
             <div class="row">
                 <div class="col-md-4">
-                    <img class="img-fluid" alt="tents and forest" src="<%=park.image%>">
+                    <% if (park.images.length > 0){ %> 
+                    <img class="img-fluid" src="<%= park.images[0].url %>" > 
+                    <% } else { %>
+                        <img src="" alt="park"> 
+                        <% } %> 
                 </div>
                 <div class="col-md-8">
                     <div class="card-body">

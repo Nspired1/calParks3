@@ -3,16 +3,35 @@
 
 <div class="row">
     <div class="col-6 offset-3">
+        <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <% park.images.forEach((photo, i) => {%> 
+                    <div class="carousel-item <%= i === 0 ? 'active' : '' %>">
+                        <img src="<%= photo.url  %>" class="d-block w-100" alt="">
+                    </div>
+                <% }) %> 
+              
+            </div>
+            <% if(park.images.length > 1){ %>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+                </button>
+            <% } %> 
+          </div>
         <div class="card mb-3">
-            <img src="<%= park.image  %>" alt="tents and trees" >
             <div class="card-body">
                 <h5 class="card-title"> <%= park.title %>  </h5>
                 <p class="card-text">  <%= park.description %> </p>
             </div>
             <ul class="list-group list-group-flush">
-                <li class="list-group-item"> <%= park.location %> </li>
+                <li class="list-group-item">Location: <%= park.location %> </li>
                 <li class="list-group-item">Submitted by: <%= park.author.username %> </li>
-                <li class="list-group-item"> <%= park.price %> </li>
+                <li class="list-group-item">Cost: $ <%= park.price %> </li>
             </ul>
             <div class="card-body">
                 <% if(currentUser && park.author.equals(currentUser._id)){%> 
@@ -28,7 +47,7 @@
                         <div class="mb-3">
                             <h6>Rating:</h6>
                             <fieldset class="starability-basic">
-                                <input type="radio" id="no-rate" class="input-no-rate" name="rating[rating]" value="0" checked aria-label="No rating." />
+                                <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
                                 <input type="radio" id="first-rate1" name="review[rating]" value="1" />
                                 <label for="first-rate1" title="Terrible">1 star</label>
                                 <input type="radio" id="first-rate2" name="review[rating]" value="2" />
@@ -68,9 +87,9 @@
                         </div>
                     <% } %> 
                 </div>
-                <footer>
+                <div>
                     <a href="/parks">Back to ALL Parks</a>
-                </footer>
+                </div>
             </div>
         </div>
     </div>

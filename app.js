@@ -25,6 +25,7 @@ const reviewRoutes = require("./routes/reviews");
 const userRoutes = require('./routes/users');
 
 
+
 mongoose.connect('mongodb://localhost:27017/calparks3', {
     useNewUrlParser: true,
     useCreateIndex: true,
@@ -85,27 +86,6 @@ app.use(morgan("dev"));
 // env variables
 const PORT = process.env.PORT || 3001;
 const IP = process.env.IP;
-
-// Joi validation middleware
-const validatePark = (req, res, next) => {
-    const parkSchema = Joi.object({
-        park: Joi.object({
-            title: Joi.string().required(),
-            description: Joi.string().required(),
-            location: Joi.string().required(),
-            price: Joi.number().min(0).allow(null, ''),
-            image: Joi.string().allow(null, '')
-        }).required()
-    })
-    const { error } = parkSchema.validate(req.body);
-    if (error){
-        const msg = error.details.map(element => element.message).join(',')
-        throw new ExpressError(msg, 400)
-    } else {
-        next();
-    }
-}
-
 
 // ROUTES
 
