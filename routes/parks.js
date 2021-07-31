@@ -11,8 +11,9 @@ const { isLoggedIn, isAuthor, validatePark } = require('../authMiddleware');
 const multer = require('multer');
 const { storage, cloudinary } = require('../cloudinary');
 const upload = multer({ storage });
-
-
+const mbxGeocoding =require('@mapbox/mapbox-sdk/services/geocoding');
+const mapBoxToken = process.env.MAPBOX_TOKEN;
+const geocoder = mbxGeocoding({ accessToken: mapBoxToken });
 
 // GET all parks
 router.get('/', catchAsync(async (req, res) => {
@@ -27,10 +28,14 @@ router.get('/new', isLoggedIn, (req, res) => {
 
 // POST route to create a NEW park
 router.post('/', isLoggedIn, upload.array('image'), validatePark, catchAsync(async(req, res, next) => {
+    const geoData = await geocoder.forwardGeocode({
+        query: req.body.park.location,
+        limit: 1
+    }).send();
     const park = new Park(req.body.park);
+    park.geometry = geoData.body.features[0].geometry;
     park.images = req.files.map( file => ({ url: file.path, filename: file.filename}))
     park.author = req.user._id;
-    console.log(park);
     await park.save();
     req.flash('success', 'Successfully made a new park!');
     res.redirect(`/parks/${park._id}`);
@@ -47,12 +52,15 @@ router.get('/:id', catchAsync(async(req, res) => {
         req.flash('error', 'Park not found.');
         res.redirect('/parks');
     }
-    console.log(park);
     res.render('parks/show', { park });
 }));
 
 // EDIT form
-router.get('/:id/edit', isLoggedIn, isAuthor, catchAsync(async(req, res) => {
+router.get('/:id/edit', isLoggedIn, isAuthor, upload.array('image'), catchAsync(async(req, res) => {
+    const geoData = await geocoder.forwardGeocode({
+        query: req.body.park.location,
+        limit: 1
+    }).send();
     const park = await Park.findById(req.params.id);
     if(!park){
         req.flash('error', 'Park not found.');
@@ -64,7 +72,12 @@ router.get('/:id/edit', isLoggedIn, isAuthor, catchAsync(async(req, res) => {
 // EDIT route
 router.put('/:id', isLoggedIn, isAuthor, upload.array('image'), validatePark, catchAsync(async(req, res) => {
     const { id } = req.params;
+    const geoData = await geocoder.forwardGeocode({
+        query: req.body.park.location,
+        limit: 1
+    }).send();
     const updatedPark = await Park.findByIdAndUpdate(id, {...req.body.park});
+    updatedPark.geometry = geoData.body.features[0].geometry;
     const images = req.files.map( file => ({ url: file.path, filename: file.filename}))
     updatedPark.images.push(...images) 
     await updatedPark.save();

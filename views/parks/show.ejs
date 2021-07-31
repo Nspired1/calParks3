@@ -1,8 +1,12 @@
 <% layout('layouts/boilerplate') %> 
 <link rel="stylesheet" type="text/css" href="/stars.css">
 
+
+
 <div class="row">
     <div class="col-6 offset-3">
+        <%= park.geometry.coordinates %>
+        <div id='map' style='width: 400px; height: 300px;'></div>
         <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
                 <% park.images.forEach((photo, i) => {%> 
@@ -95,4 +99,9 @@
     </div>
 </div>
 
+<script>
+    const mapBoxToken = "<%-process.env.MAPBOX_TOKEN %>"
+    const park = <%- JSON.stringify(park) %>
+</script>
+<script src="/showMap.js"></script>
    
