@@ -4,7 +4,8 @@
   "description": "a Yelp like app for California parks",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier **/*.{js,ejs,html}\" --write"
   },
   "keywords": [
     "parks",
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "morgan": "^1.10.0",
-    "nodemon": "^2.0.12"
+    "nodemon": "^2.0.12",
+    "prettier": "^2.3.2"
   }
 }
