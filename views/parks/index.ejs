@@ -1,9 +1,9 @@
 <% layout('layouts/boilerplate') %>
+<div id="map" style="width: 100%; height: 500px "></div>
     <h1>All Parks</h1>
     <div>
         <a href="/parks/new">Add Park</a>
     </div>
-   
         <% for (let park of parks){ %>
         <div class="card" mb-3>
             <div class="row">
@@ -18,7 +18,7 @@
                     <div class="card-body">
                         <h5 class="card-title">
                             <%= park.title  %> 
-                        </h5>
+                        </h5> 
                         <p class="card-text">
                             <%= park.description  %> 
                         </p>
@@ -31,4 +31,9 @@
             </div>
         </div>
         <% } %>
-   
+
+<script>
+    const mapBoxToken = "<%-process.env.MAPBOX_TOKEN %>"
+    const parks = {features: <%- JSON.stringify(parks) %>}
+</script>
+<script src="/clusterMap.js"> </script>
