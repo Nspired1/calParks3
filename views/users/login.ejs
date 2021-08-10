@@ -1,19 +1,31 @@
 <% layout('layouts/boilerplate')  %> 
-<div class="row">
-    <h1 class="text-center">Login</h1>
-        <div class="col-6 offset-3">
-            <form action="/login" method="POST" class="needs-validation" novalidate>
-                <div class="mb-3" >
-                    <label class="form-label" for="username">Username</label>
-                    <input class="form-control" type="text" id="username" name="username" required> 
-                    <div class="valid-feedback">Looks good!</div>
+
+<div class="container d-flex justify-content-center align-items-center mt-5">
+    <div class="row">
+            <div class="col-md-9 offset-md-2 col-lg-6 offset-lg-3">    
+                <div class="card shadow">
+                    <img src="/images/patrick-hendry-eDgUyGu93Yw-unsplash.jpg" alt="tent entrance" class="card-img-top">
+                    <div class="card-body">
+                        <!-- Photo by Patrick Hendry on Unsplash-->
+                        <h5 class="card-title">Login</h5>
+                        <form action="/login" method="POST" class="needs-validation" novalidate>
+                            <div class="mb-3" >
+                                <label class="form-label" for="username">Username</label>
+                                <input class="form-control" type="text" id="username" name="username" required autofocus> 
+                                <div class="valid-feedback">Looks good!</div>
+                            </div>
+                            <div class="mb-3" >
+                                <label class="form-label" for="password">Password</label>
+                                <input class="form-control" type="password" id="password" name="password" required> 
+                                <div class="valid-feedback">Looks good!</div>
+                            </div>
+                            <div class="d-grid">
+                                <button class="btn btn-primary">Submit</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="mb-3" >
-                    <label class="form-label" for="password">Password</label>
-                    <input class="form-control" type="password" id="password" name="password" required> 
-                    <div class="valid-feedback">Looks good!</div>
-                </div>
-                <button class="btn btn-primary">Submit</button>
-            </form>
-        </div>
+            </div>
+    </div>
 </div>
+
