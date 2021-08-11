@@ -3,11 +3,12 @@
     <div class="col-6 offset-3">
         <div class="alert alert-danger" role="alert">
             <h4 class="alert-heading"><%= err.message %></h4>
-            <h5>For Development Only. Error Stack Trace:</h5>
-            <p>
-                <%= err.stack  %> 
-            </p>
-        
+                <% if (process.env.NODE_ENV !== "production") {%> 
+                    <h5>For Development Only. Error Stack Trace:</h5>
+                    <p>
+                        <%= err.stack  %> 
+                    </p>
+                <% } %> 
         </div>
     </div>
 </div>
