@@ -27,7 +27,8 @@ const mongoSanitize = require("express-mongo-sanitize");
 const helmet = require("helmet");
 
 // setup mongoose
-mongoose.connect("mongodb://localhost:27017/calparks3", {
+const dbLocal = "mongodb://localhost:27017/calparks3";
+mongoose.connect(process.env.DB_URL, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useUnifiedTopology: true,
@@ -60,9 +61,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
 //use Mongo to store session
-const dbLink = "mongodb://localhost:27017/calparks3";
 const dbStore = new MongoStore({
-  mongoUrl: dbLink,
+  mongoUrl: process.env.DB_URL,
   secret: "squirrel",
   touchAfter: 24 * 60 * 3600,
 });
