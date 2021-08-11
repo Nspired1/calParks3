@@ -2,15 +2,8 @@
 <link rel="stylesheet" type="text/css" href="/stars.css">
 <link rel="stylesheet" type="text/css" href="/stylesheets/map.css" >
 
-
 <div class="row">
-    <div class="col-6 offset-3">
-        <div id='map'></div>
-        <div>
-            <p>Lat & Long:  <%= park.geometry.coordinates %></p>
-        </div>
-       
-        
+    <div class="col-5 offset-1">
         <div id="carouselExampleControls" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
                 <% park.images.forEach((photo, i) => {%> 
@@ -43,7 +36,7 @@
             </ul>
             <div class="card-body">
                 <% if(currentUser && park.author.equals(currentUser._id) || (currentUser && currentUser.isAdmin) ){%> 
-                    <a class="card-link btn btn-primary" href="/parks/<%= park._id%>/edit" >Edit</a>
+                    <a class="card-link btn btn-warning" href="/parks/<%= park._id%>/edit" >Edit</a>
                     <form class="d-inline" action="/parks/<%= park._id %>?_method=DELETE" method="POST">
                         <button class="btn btn-danger">DELETE</button>
                     </form>
@@ -101,6 +94,12 @@
             </div>
         </div>
     </div>
+    <div class="col-5 offset-1">
+        <div id='map'></div>
+        <div>
+            <p>Lat & Long:  <%= park.geometry.coordinates[0].toFixed(6) %>, <%= park.geometry.coordinates[1] %></p>
+        </div>
+    </div>  
 </div>
 
 <script>
