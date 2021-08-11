@@ -1,4 +1,9 @@
 <% layout('layouts/boilerplate') %>
+
+<% if(currentUser && currentUser.isAdmin) {%>
+    <h2>You're Logged in as an Administrator</h2>
+<% } %> 
+
 <div id="map" style="width: 100%; height: 500px "></div>
     <h1>All Parks</h1>
     <div>

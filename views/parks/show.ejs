@@ -1,11 +1,11 @@
 <% layout('layouts/boilerplate') %> 
 <link rel="stylesheet" type="text/css" href="/stars.css">
-<link rel="stylesheet" type="text/css" href="/clusterMap.css" >
+<link rel="stylesheet" type="text/css" href="/stylesheets/map.css" >
 
 
 <div class="row">
     <div class="col-6 offset-3">
-        <div id='map' ></div>
+        <div id='map'></div>
         <div>
             <p>Lat & Long:  <%= park.geometry.coordinates %></p>
         </div>
@@ -42,7 +42,7 @@
                 <li class="list-group-item">Cost: $ <%= park.price %> </li>
             </ul>
             <div class="card-body">
-                <% if(currentUser && park.author.equals(currentUser._id)){%> 
+                <% if(currentUser && park.author.equals(currentUser._id) || (currentUser && currentUser.isAdmin) ){%> 
                     <a class="card-link btn btn-primary" href="/parks/<%= park._id%>/edit" >Edit</a>
                     <form class="d-inline" action="/parks/<%= park._id %>?_method=DELETE" method="POST">
                         <button class="btn btn-danger">DELETE</button>
@@ -85,7 +85,7 @@
                                     Rated: <%= review.rating %> stars
                                   </p>
                                 <p class="card-text"> Review: <%= review.body  %> </p>
-                                <% if(currentUser && review.author.equals(currentUser._id)) { %>   
+                                <% if(currentUser && review.author.equals(currentUser._id) || (currentUser && currentUser.isAdmin) ) { %>   
                                 <form action="/parks/<%= park._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST" >
                                     <button class="btn btn-danger btn-sm">DELETE</button>
                                 </form>
