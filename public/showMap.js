@@ -2,7 +2,7 @@ mapboxgl.accessToken = mapBoxToken;
 var map = new mapboxgl.Map({
   container: "map", // container ID
   style: "mapbox://styles/mapbox/streets-v11", // style URL
-  center: park.geometry.coordinates, // starting position [lng, lat]
+  center: park.geometry.coordinates, // starting position, data is [lng, lat]
   zoom: 9, // starting zoom
 });
 
