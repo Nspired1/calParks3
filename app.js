@@ -12,6 +12,7 @@ const LocalStrategy = require("passport-local");
 const methodOverride = require("method-override");
 const engine = require("ejs-mate");
 const mongoose = require("mongoose");
+const MongoStore = require("connect-mongo");
 const User = require("./models/user");
 const Park = require("./models/park");
 const Review = require("./models/review");
@@ -58,8 +59,21 @@ app.use(express.urlencoded({ extended: true }));
 // use static assets
 app.use(express.static(path.join(__dirname, "public")));
 
+//use Mongo to store session
+const dbLink = "mongodb://localhost:27017/calparks3";
+const dbStore = new MongoStore({
+  mongoUrl: dbLink,
+  secret: "squirrel",
+  touchAfter: 24 * 60 * 3600,
+});
+
+dbStore.on("error", function (err) {
+  console.log("SESSION STORE ERROR", err);
+});
+
 // configure cookie session
 const sessionConfig = {
+  store: dbStore,
   secret: "onlyfordevelopment",
   resave: false,
   saveUninitialized: true,
