@@ -9,21 +9,21 @@ const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
-const User = require("./models/user");
 const methodOverride = require("method-override");
 const engine = require("ejs-mate");
 const mongoose = require("mongoose");
+const User = require("./models/user");
 const Park = require("./models/park");
 const Review = require("./models/review");
 const catchAsync = require("./utils/catchAsync");
 const ExpressError = require("./utils/ExpressError");
 const Joi = require("joi");
-const { reviewSchema } = require("./joiSchemas.js");
 const morgan = require("morgan");
 const parkRoutes = require("./routes/parks");
 const reviewRoutes = require("./routes/reviews");
 const userRoutes = require("./routes/users");
 const mongoSanitize = require("express-mongo-sanitize");
+const helmet = require("helmet");
 
 // setup mongoose
 mongoose.connect("mongodb://localhost:27017/calparks3", {
@@ -71,6 +71,9 @@ const sessionConfig = {
 };
 
 app.use(session(sessionConfig));
+
+// helmet sets http headers for increased security
+app.use(helmet({ contentSecurityPolicy: false }));
 
 // user authorization and authentication with passport
 app.use(passport.initialize());
