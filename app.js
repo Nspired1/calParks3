@@ -106,7 +106,7 @@ app.use((req, res, next) => {
 });
 
 // use morgan logging library for development
-app.use(morgan("dev"));
+//app.use(morgan("dev"));
 
 // env variables
 const PORT = process.env.PORT || 3001;
