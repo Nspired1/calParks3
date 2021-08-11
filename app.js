@@ -23,6 +23,7 @@ const morgan = require("morgan");
 const parkRoutes = require("./routes/parks");
 const reviewRoutes = require("./routes/reviews");
 const userRoutes = require("./routes/users");
+const mongoSanitize = require("express-mongo-sanitize");
 
 // setup mongoose
 mongoose.connect("mongodb://localhost:27017/calparks3", {
@@ -37,6 +38,13 @@ db.on("error", console.error.bind(console, "Connection ERROR:"));
 db.once("open", () => {
   console.log("Database connected");
 });
+
+// prevent Mongo injection attack (like SQL injection)
+app.use(
+  mongoSanitize({
+    replaceWith: "_",
+  })
+);
 
 // set view engine
 app.engine("ejs", engine);
@@ -61,6 +69,7 @@ const sessionConfig = {
     maxAge: 1000 * 60 * 60 * 24 * 7,
   },
 };
+
 app.use(session(sessionConfig));
 
 // user authorization and authentication with passport
