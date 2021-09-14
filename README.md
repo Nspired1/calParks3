@@ -1,10 +1,8 @@
-The frontend uses View EJS, Bootstrap, HTML, CSS. The backend uses Node.js with an Express server, Mongo database + Mongoose Object Relational Mapping (ORM) tool, Cloudinaryfor image upload and storage, Passport for security, calls to Mapbox API, Joi for validation, and a variety of different libraries for different features.
-
 # Cal Parks
 
 ## :zap: Yelp-like app for California parks
 
-- Simple fullstack app that shows a list of California parks with an EJS view engine and processed on the Express server. Parks are saved in a hosted Mongodb database, MongoDB Atlas.
+- Simple fullstack app where users can make posts of California parks, write a description, and give a rating. Users can also comment & rate other posts.
 
 ## :page_facing_up: Table of Contents
 
@@ -20,15 +18,14 @@ The frontend uses View EJS, Bootstrap, HTML, CSS. The backend uses Node.js with 
 
 ## :books: General Info
 
-- A simple Yelp like app for California parks where users can register, login, and logout; full Create Read Update Delete (CRUD) functionality for making posts where users can write a brief description of a park, upload pictures of parks, and add location of the park. If they choose, they can delete their post. Also, users can post a rating of the park and leave comments, but users can comment on other users' posts, but cannot delete others' posts or comments.
-
-With the location geocoder translates the location to latitude and longitude on a map using the Mapbox API. Yahoo Weather to display the location and weather in the post.
+- Uses EJS (Embedded JavaScript) templates for the frontend and requests processed on the backend with an Express server. Parks are saved in a hosted Mongodb database, MongoDB Atlas. Images are saved in a hosted cloud database, Cloudinary. Mapbox is used for location and displaying maps.
+- Users can register, login, and logout; full Create Read Update Delete (CRUD) functionality for making posts where users can write a description of a park, upload pictures, and add the location. If they choose, they can delete their post. Also, users can post a rating of the park and leave comments, users can comment on other users' posts, but cannot delete others' posts or comments.
 
 ## :microscope: Deep Dive
 
 - Uploading images takes more writing and research than just posting to the server and database. The form type is different, the html forms need to be `multipart/form-data` to send files. Multer middleware helps by adding a file (or files) object to the request object. The request object is received by the Express server, the file is uploaded to Cloudinary, and MongoDB holds the link. The reason for this is MongoDB isn't the best place to hold images, so a hosted cloud database like Cloudinary was needed.
-- Joi validation does not work with files. So image uploads are problematic.
-- Trying to address the lag in loading some images and split-second display of a small login and register form.
+- Joi validation does not work with files. So image uploads are problematic and the Joi middleware has to work around the file upload.
+- One issue that is still being worked on is the lag in loading images and split-second display of a login and register form.
 
 ## :computer: Technologies
 
@@ -41,6 +38,8 @@ With the location geocoder translates the location to latitude and longitude on 
 - [Cloudinary](https://cloudinary.com/) for hosted image storage
 - [Multer](https://www.npmjs.com/package/multer) handling multipart/form-data, in this case, sending images
 - [Mapbox](https://www.mapbox.com/) for cluster map and park location
+- [Joi](https://joi.dev/api/?v=17.4.2) for validation
+- [Bootstrap](https://getbootstrap.com/docs/5.1/getting-started/introduction/) frontend framework
 
 ## :floppy_disk: Setup
 
